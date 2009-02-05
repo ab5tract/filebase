@@ -57,5 +57,7 @@ end
 
 desc "run test suite to verify implementation"
 task :test do
-  system( 'bacon test/*.rb' )
+  paths = FileList['test/**/*.rb'].exclude('**/helpers.rb')
+  command = "bacon #{paths.join(' ')}"
+  system command
 end
