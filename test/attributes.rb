@@ -10,7 +10,14 @@ require 'filebase/attributes'
 describe "An attributified object" do
   
   before do
-    @class = Class.new { include Attributes }
+    @superclass = Class.new do
+      def method_missing(*args)
+        "bogus method_missing"
+      end
+    end
+    @class = Class.new(@superclass) do
+      include Attributes
+    end
     @thing = @class.new
   end
   
@@ -48,14 +55,15 @@ describe "An attributified object" do
     @thing.attributes.should.be.empty
   end
   
-  it "provides getter/setter methods using the key name" do
+  it "uses method_missing to provide getter/setter methods using the key name" do
     @thing.smurf = "nuts"
     @thing.smurf.should == "nuts"
+    @thing.not_here("foo").should == "bogus method_missing"
   end
   
   it "ensures that sub-hashes are also attributified" do
     @thing["subhash"] = { :smurf => "nuts" }
-    @thing["subhash"].smurf.should == "nuts"
+    @thing.get("subhash").smurf.should == "nuts"
   end
   
   it "may spit out attributes as a Hash upon demand" do
