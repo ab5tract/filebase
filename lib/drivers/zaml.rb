@@ -1,7 +1,7 @@
-require 'yaml'
+require 'zaml'
 class Filebase
   
-  class YAML
+  class ZAML
     
     def initialize( root )
       @root = root.to_s
@@ -13,20 +13,20 @@ class Filebase
   	
   	def all
   	  Dir['*.yml'].map do |file|
-  	   obj = ::YAML.load_file(file) 
+  	   obj = ::ZAML.load_file(file) 
   	   obj['key'] = File.basename(file, '.yml') if obj.is_a? Hash
   	   obj or nil
   	  end
   	end
     
     def find( key )
-  		obj = ::YAML.load_file( path( key ) ) rescue nil
+  		obj = ::ZAML.load_file( path( key ) ) rescue nil
   		obj['key'] = key if obj.is_a? Hash
   		obj or nil # convert false to nil
   	end
   	
   	def save( key, object )
-  	  object if File.open( path(key) ) { |f| ::YAML.dump(object, f) }
+  	  object if File.open( path(key) ) { |f| ::ZAML.dump(object, f) }
   	end
   	
   	def delete( key )
