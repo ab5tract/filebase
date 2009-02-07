@@ -1,10 +1,21 @@
 require "#{File.dirname(__FILE__)}/helpers"
 require 'filebase'
 require 'filebase/drivers/json'
+require 'filebase/drivers/yaml'
+require 'filebase/drivers/marshal'
 require 'filebase/model'
 
-class Person ; include Filebase::Model[ "#{test_dir}/db/person" ] ; has_one :organization ; end
-class Organization ; include Filebase::Model[ "#{test_dir}/db/organization" ] ; has_many :members, :class => Person ; end
+class Person
+  include Filebase::Model[ "#{test_dir}/db/person", Filebase::JSON ]
+  has_one :organization
+end
+class Organization
+  include Filebase::Model[ "#{test_dir}/db/organization", Filebase::Marshal ]
+  has_many :members, :class => Person
+end
+
+Organization.create :key => "acme.com", :name => "Acme, Inc.", :members => [ "joe@acme.com"]
+Person.create(:key => "joe@acme.com", :organization => "acme.com", :name => "Joe Smith")
 
 describe 'A filebase' do
 

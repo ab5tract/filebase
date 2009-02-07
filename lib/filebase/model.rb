@@ -6,12 +6,12 @@ class Filebase
 	
 	module Model
 		
-		def self.[]( path )
+		def self.[]( path, storage=nil )
 		  Module.new do |mixin|
 		    ( class << mixin ; self ; end ).module_eval do
 		      define_method( :included ) do | model |
   		      model.module_eval do
-              @db = Filebase.new( path )
+              @db = Filebase.new( path, storage )
   		        extend Mixins::ClassMethods ; include Attributes ;  include Mixins::InstanceMethods
   		      end
   		    end

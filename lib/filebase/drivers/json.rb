@@ -3,7 +3,6 @@ require 'fileutils'
 class Filebase
   
   class JSON
-    Filebase.storage = self
     
     def initialize( root )
       @root = root.to_s
