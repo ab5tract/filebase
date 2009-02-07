@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'filebase/drivers/mixin'
 class Filebase
   class << self ; attr_accessor :storage ; end
 	def initialize( root = '.', storage = nil )
