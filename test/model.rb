@@ -6,16 +6,19 @@ require 'filebase/drivers/marshal'
 require 'filebase/model'
 
 class Person
-  include Filebase::Model[ "#{test_dir}/db/person", Filebase::JSON ]
+  include Filebase::Model[ "#{test_dir}/db/person", Filebase::Drivers::JSON ]
   has_one :organization
 end
+
 class Organization
-  include Filebase::Model[ "#{test_dir}/db/organization", Filebase::Marshal ]
+  include Filebase::Model[ "#{test_dir}/db/organization", Filebase::Drivers::YAML ]
   has_many :members, :class => Person
 end
 
-Organization.create :key => "acme.com", :name => "Acme, Inc.", :members => [ "joe@acme.com"]
-Person.create(:key => "joe@acme.com", :organization => "acme.com", :name => "Joe Smith")
+# Marshal format varies between ruby versions.  To get the marshal data files,
+# uncomment the below lines and run, then comment again.
+# Organization.create :key => "acme.com", :name => "Acme, Inc.", :members => [ "joe@acme.com"]
+# Person.create(:key => "joe@acme.com", :organization => "acme.com", :name => "Joe Smith")
 
 describe 'A filebase' do
 
@@ -34,6 +37,12 @@ describe 'A filebase' do
   it 'should allow you to create a new record' do
     Person.create( :key => 'jane@acme.com', :name => 'Jane Smith' )
     Person.find( 'jane@acme.com' ).name.should == 'Jane Smith'
+  end
+  
+  it "raises when you try to create a record that already exists" do
+    lambda do
+      Person.create( :key => 'joe@acme.com', :name => 'Joe Blow' )
+    end.should.raise
   end
   
   it 'should allow you to modify a record and save the change' do

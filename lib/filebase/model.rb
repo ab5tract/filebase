@@ -23,7 +23,11 @@ class Filebase
 		  
 		  module ClassMethods
 		    attr_accessor :db
-		    def create( assigns ) ; save( new( assigns ) ) ; end
+		    def create( assigns )
+		      object = new( assigns )
+		      raise Filebase::Error, "record already exists" if db.has_key?(object["key"])
+		      save( object )
+	      end
 		    def all ; db.all.map { |attrs| new( attrs ) } ; end
 		    def find( key ) ; attrs = db.find( key ); new( attrs ) if attrs ; end
 		    def []( key ) ; find( key ) ; end
