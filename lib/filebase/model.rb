@@ -11,7 +11,8 @@ class Filebase
 		    ( class << mixin ; self ; end ).module_eval do
 		      define_method( :included ) do | model |
   		      model.module_eval do
-              @db = Filebase.new( path, storage )
+  		        storage = Filebase::Drivers.const_get(storage.to_s.upcase) if storage
+              @db = Filebase.new( path, storage ).storage
   		        extend Mixins::ClassMethods ; include Attributes ;  include Mixins::InstanceMethods
   		      end
   		    end

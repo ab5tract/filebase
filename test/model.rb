@@ -6,12 +6,12 @@ require 'filebase/drivers/marshal'
 require 'filebase/model'
 
 class Person
-  include Filebase::Model[ "#{test_dir}/db/person", Filebase::Drivers::JSON ]
+  include Filebase::Model[ "#{test_dir}/db/person" ]
   has_one :organization
 end
 
 class Organization
-  include Filebase::Model[ "#{test_dir}/db/organization", Filebase::Drivers::YAML ]
+  include Filebase::Model[ "#{test_dir}/db/organization", :yaml ]
   has_many :members, :class => Person
 end
 
