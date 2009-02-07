@@ -1,7 +1,9 @@
 require 'yaml'
+require 'fileutils'
 class Filebase
   
   class YAML
+    Filebase.storage = self
     
     def initialize( root )
       @root = root.to_s
@@ -12,11 +14,11 @@ class Filebase
   	end
   	
   	def all
-  	  Dir['*.yml'].map do |file|
-  	   obj = ::YAML.load_file(file) 
-  	   obj['key'] = File.basename(file, '.yml') if obj.is_a? Hash
-  	   obj or nil
-  	  end
+      Dir["#{@root}/*.yml"].map do |file|
+       obj = ::YAML.load_file(file) 
+       obj['key'] = File.basename(file, '.yml') if obj.is_a? Hash
+       obj or nil
+      end
   	end
     
     def find( key )
@@ -26,11 +28,11 @@ class Filebase
   	end
   	
   	def save( key, object )
-  	  object if File.open( path(key) ) { |f| ::YAML.dump(object, f) }
+		  object if File.open( path(key), "w" ) { |f| ::YAML.dump(object, f) }
   	end
   	
   	def delete( key )
-  		FileUtils.remove( path( key ) )
+  		::FileUtils.remove( path( key ) )
 	  end
 	  
 	end

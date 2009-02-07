@@ -1,10 +1,4 @@
-require 'rubygems'
-require 'bacon'
-Bacon.extend Bacon::TestUnitOutput
-Bacon.summary_on_exit
-
-
-$:.unshift "#{HERE = File.dirname(__FILE__)}../lib"
+require "#{File.dirname(__FILE__)}/helpers"
 require 'filebase/attributes'
 
 describe "An attributified object" do

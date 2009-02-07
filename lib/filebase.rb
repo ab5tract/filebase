@@ -1,8 +1,6 @@
 require 'rubygems'
-require 'drivers/yaml'
 class Filebase
   class << self ; attr_accessor :storage ; end
-  self.storage = YAML
 	def initialize( root = '.', storage = nil )
 		@storage = ( storage || Filebase.storage ).new( root )
 	end

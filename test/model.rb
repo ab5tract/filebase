@@ -1,16 +1,10 @@
-require 'rubygems'
-require 'bacon'
-Bacon.extend Bacon::TestUnitOutput
-Bacon.summary_on_exit
-
-
-$:.unshift "#{HERE = File.dirname(__FILE__)}../lib"
+require "#{File.dirname(__FILE__)}/helpers"
 require 'filebase'
+require 'filebase/drivers/yaml'
 require 'filebase/model'
-require 'drivers/yaml'
 
-class Person ; include Filebase::Model[ "#{HERE}/db/person" ] ; has_one :organization ; end
-class Organization ; include Filebase::Model[ "#{HERE}/db/organization" ] ; has_many :members, :class => Person ; end
+class Person ; include Filebase::Model[ "#{test_dir}/db/person" ] ; has_one :organization ; end
+class Organization ; include Filebase::Model[ "#{test_dir}/db/organization" ] ; has_many :members, :class => Person ; end
 
 describe 'A filebase' do
 
