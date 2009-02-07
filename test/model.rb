@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helpers"
 require 'filebase'
-require 'filebase/drivers/yaml'
+require 'filebase/drivers/json'
 require 'filebase/model'
 
 class Person ; include Filebase::Model[ "#{test_dir}/db/person" ] ; has_one :organization ; end
