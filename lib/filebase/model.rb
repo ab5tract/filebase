@@ -6,13 +6,13 @@ class Filebase
 	
 	module Model
 		
-		def self.[]( path, storage=nil )
+		def self.[]( path, driver=nil )
 		  Module.new do |mixin|
 		    ( class << mixin ; self ; end ).module_eval do
 		      define_method( :included ) do | model |
   		      model.module_eval do
-  		        storage = Filebase::Drivers.const_get(storage.to_s.upcase) if storage
-              @db = Filebase.new( path, storage ).storage
+  		        storage = driver ? Filebase::Drivers.const_get(driver.to_s.upcase) : Filebase.storage
+  		        @db = storage.new(path)
   		        extend Mixins::ClassMethods ; include Attributes ;  include Mixins::InstanceMethods
   		      end
   		    end
