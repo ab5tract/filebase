@@ -1,6 +1,6 @@
 module Attributes
   
-	def initialize( hash = {} ) ; self.attributes = hash ; end
+	def initialize( assigns = {} ) ; self.attributes = assigns ; end
 	
 	def attributes=( hash )
 	  @attrs = {}; hash.each { |k,v| @attrs[k.to_s] = v }

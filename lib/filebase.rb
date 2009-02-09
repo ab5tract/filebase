@@ -13,3 +13,12 @@ class Filebase
 	end
 	
 end
+
+class String
+  unless method_defined?(:camel_case)
+    def camel_case
+      # It sucks that you can't do this thread safely.
+      gsub(/(_)(\w)/) { |m| m.upcase }.gsub(/^([a-z])/) { $1.upcase }
+    end
+  end
+end

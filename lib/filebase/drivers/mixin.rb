@@ -4,6 +4,7 @@ class Filebase
     module Mixin
             
       def path( key )
+        raise Filebase::Error, "can't generate a path using a nil key" unless key
         "#{@root}/#{key}.#{@extension}"
       end
 

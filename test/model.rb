@@ -7,12 +7,10 @@ require 'filebase/model'
 
 class Person
   include Filebase::Model[ "#{test_dir}/db/person" ]
-  has_one :organization
 end
 
 class Organization
-  include Filebase::Model[ "#{test_dir}/db/organization", :yaml ]
-  has_many :members, :class => Person
+  include Filebase::Model[ "#{test_dir}/db/organization", :YAML ]
 end
 
 # Marshal format varies between ruby versions.  To generate the marshal data files,
@@ -28,6 +26,7 @@ describe 'A filebase' do
 
   it 'should allow you to access an existing record' do
     Person.find( 'joe@acme.com' ).name.should == 'Joe Smith'
+    Person['joe@acme.com'].name.should == 'Joe Smith'
   end
   
   it 'should return nil if the record does not exist' do
@@ -64,16 +63,6 @@ describe 'A filebase' do
   
   it 'should raise an exception if you save an object without a key' do
     lambda { Person.create( :name => 'Jane Smith' ) }.should.raise( Filebase::Error )
-  end
-  
-  it "should allow a 'has-one' association" do
-    joe = Person.find('joe@acme.com'); joe.organization = Organization.find('acme.com'); joe.save
-    Person.find('joe@acme.com').organization.key.should == 'acme.com'
-  end
-  
-  it "should allow a 'has-many' association'" do
-    acme = Organization.find('acme.com'); acme.members << Person.find('joe@acme.com'); acme.save
-    acme.members.include?( Person.find( 'joe@acme.com' )).should == true
-  end    
+  end  
   
 end

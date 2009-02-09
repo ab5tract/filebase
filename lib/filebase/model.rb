@@ -5,13 +5,15 @@ class Filebase
   Error = RuntimeError
 	
 	module Model
+	  
+
 		
 		def self.[]( path, driver=nil )
 		  Module.new do |mixin|
 		    ( class << mixin ; self ; end ).module_eval do
 		      define_method( :included ) do | model |
   		      model.module_eval do
-  		        storage = driver ? Filebase::Drivers.const_get(driver.to_s.upcase) : Filebase.storage
+  		        storage = driver ? Filebase::Drivers.const_get(driver.to_s) : Filebase.storage
   		        @db = storage.new(path)
   		        extend Mixins::ClassMethods ; include Attributes ;  include Mixins::InstanceMethods
   		      end
@@ -26,57 +28,64 @@ class Filebase
 		    attr_accessor :db
 		    def create( assigns )
 		      object = new( assigns )
-		      raise Filebase::Error, "record already exists" if db.has_key?(object["key"])
+		      raise Filebase::Error, "record already exists" if @db.has_key?(object["key"])
 		      save( object )
 	      end
 		    def all ; @db.all.map { |attrs| new( attrs ) } ; end
 		    def find( key ) ; attrs = @db.find( key ); new( attrs ) if attrs ; end
-		    def []( key ) ; find( key ) ; end
+		    alias_method :[], :find
+		    
 		    def save( object )
-		      raise( Filebase::Error, 'attempted to save an object with nil key' ) if object.key.nil? or object.key.empty?
-          @db.save( object.key, object.to_h ) and object
+		      key = object.key
+		      raise( Filebase::Error, 'attempted to save an object with nil key' ) unless key and !key.empty?
+          @db.save( key, object.to_h ) and object
 		    end
+		    
 		    def delete( object )
-		      raise( Filebase::Error, 'attempted to delete an object with nil key' ) if object.key.nil? or object.key.empty?
+		      key = object.key
+		      raise( Filebase::Error, 'attempted to delete an object with nil key' ) unless key and !key.empty?
 		      @db.delete( object.key )
 		    end
-		    def has_one( name, options = {} )
+		    
+		    def has_one( assoc_key, options = {} )
 		      module_eval do
-		        define_method name do
+		        define_method assoc_key do
+  	          foreign_class = options[:class] || Object.module_eval( assoc_key.to_s.camel_case )
   		        @has_one ||= {}
-    		      options[:class] ||= Object.module_eval( name.to_s.gsub(/(_)(\w)/) { $2.upcase }.gsub(/^([a-z])/) { $1.upcase } )
-		          @has_one[name] ||= options[:class].find( get( name ) ) 
+		          @has_one[assoc_key] ||= foreign_class.find( get( assoc_key ) ) 
 		        end
-		        define_method( name.to_s + '=' ) do | val |
-  		        @has_one ||= {}; @has_one[name] = nil
-		          set( name, String === val ? val : val.key )
+		        define_method( assoc_key.to_s + '=' ) do | val |
+  		        @has_one ||= {}; @has_one[assoc_key] = nil
+		          set( assoc_key, String === val ? val : val.key )
 		        end
 		      end
 		    end
-		    def has_many( name, options = {} )
+		    
+		    def has_many( assoc_key, options = {} )
 		      module_eval do
-		        define_method( name ) do
+		        define_method( assoc_key ) do
+  	          foreign_class = options[:class] || Object.module_eval( assoc_key.to_s.camel_case )
 		          @has_many ||= {}
-    		      options[:class] ||= Object.module_eval( name.to_s.camel_case )
-		          @has_many[name] ||= ( get( name ) || [] ).uniq.map { |key| options[:class].find( key ) } 
+		          @has_many[assoc_key] ||= ( get( assoc_key ) || [] ).uniq.map { |key| foreign_class.find( key ) } 
 		        end
             # when we save, make sure to pick up any changes to the array
             (class<<self;self;end).module_eval do
-              old_save = instance_method(:save)
+              alias_method :old_save, :save
               define_method :save do |object|
-  		          object.set( name, object.send( name ).map{ |x| x.key }.uniq )
-                old_save.bind(self).call(object)
+  		          object.set( assoc_key, object.send( assoc_key ).map{ |x| x.key }.uniq )
+                old_save(object)
               end
             end
           end
 		    end
+		    
 		  end
 		  
       module InstanceMethods
         def save ; self.class.save( self ) ; end
         def delete ; self.class.delete( self ) ; self ; end
         def ==(object) ; key == object.key ; end
-        def eql?(object) ; key == object.key ; end
+        def eql?(object) ; key == object.key ; end # this seems iffy
         def hash ; key.hash ; end
       end
 
