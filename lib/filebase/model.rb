@@ -29,16 +29,16 @@ class Filebase
 		      raise Filebase::Error, "record already exists" if db.has_key?(object["key"])
 		      save( object )
 	      end
-		    def all ; db.all.map { |attrs| new( attrs ) } ; end
-		    def find( key ) ; attrs = db.find( key ); new( attrs ) if attrs ; end
+		    def all ; @db.all.map { |attrs| new( attrs ) } ; end
+		    def find( key ) ; attrs = @db.find( key ); new( attrs ) if attrs ; end
 		    def []( key ) ; find( key ) ; end
 		    def save( object )
-		      raise( Filebase::Error.new, 'attempted to save an object with nil key' ) if object.key.nil? or object.key.empty?
-          db.save( object.key, object.to_h ) and object
+		      raise( Filebase::Error, 'attempted to save an object with nil key' ) if object.key.nil? or object.key.empty?
+          @db.save( object.key, object.to_h ) and object
 		    end
 		    def delete( object )
-		      raise( Filebase::Error.new, 'attempted to delete an object with nil key' ) if object.key.nil? or object.key.empty?
-		      db.delete( object.key )
+		      raise( Filebase::Error, 'attempted to delete an object with nil key' ) if object.key.nil? or object.key.empty?
+		      @db.delete( object.key )
 		    end
 		    def has_one( name, options = {} )
 		      module_eval do
