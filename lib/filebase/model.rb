@@ -73,9 +73,7 @@ class Filebase
 		  end
 		  
       module InstanceMethods
-        def initialize( assigns ) ; super ; assign( assigns ) ; end
-        def assign( assigns ) ; assigns.each { |k,v| self.send( "#{k}=", v ) }; self ; end
-        def save ; self.class.save( self ) ; self; end
+        def save ; self.class.save( self ) ; end
         def delete ; self.class.delete( self ) ; self ; end
         def ==(object) ; key == object.key ; end
         def eql?(object) ; key == object.key ; end
