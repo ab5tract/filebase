@@ -15,7 +15,7 @@ class Organization
   has_many :members, :class => Person
 end
 
-# Marshal format varies between ruby versions.  To get the marshal data files,
+# Marshal format varies between ruby versions.  To generate the marshal data files,
 # uncomment the below lines and run, then comment again.
 # Organization.create :key => "acme.com", :name => "Acme, Inc.", :members => [ "joe@acme.com"]
 # Person.create(:key => "joe@acme.com", :organization => "acme.com", :name => "Joe Smith")
