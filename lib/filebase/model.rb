@@ -6,8 +6,6 @@ class Filebase
 	
 	module Model
 	  
-
-		
 		def self.[]( path, driver=nil )
 		  Module.new do |mixin|
 		    ( class << mixin ; self ; end ).module_eval do
@@ -38,7 +36,7 @@ class Filebase
 		    def save( object )
 		      key = object.key
 		      raise( Filebase::Error, 'attempted to save an object with nil key' ) unless key and !key.empty?
-          @db.save( key, object.to_h ) and object
+          @db.write( key, object.to_h ) and object
 		    end
 		    
 		    def delete( object )
@@ -70,11 +68,25 @@ class Filebase
 		        end
             # when we save, make sure to pick up any changes to the array
             (class<<self;self;end).module_eval do
-              alias_method :old_save, :save
+              alias_method :has_many_save, :save
               define_method :save do |object|
   		          object.set( assoc_key, object.send( assoc_key ).map{ |x| x.key }.uniq )
-                old_save(object)
+                has_many_save(object)
               end
+            end
+          end
+		    end
+		    
+		    def index_on( attribute )
+		      index ||= @db.class.new("#{@db.root}/indexes")
+		      (class<<self;self;end).module_eval do
+            alias_method :index_on_save, :save
+            class_name = self.class.name
+            define_method :save do |object|
+              index_on_save(object)
+              class_index = index.find(class_name)
+              class_index[attribute] << object.key
+              class_index.save
             end
           end
 		    end

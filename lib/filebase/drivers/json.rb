@@ -24,8 +24,8 @@ class Filebase
     		obj or nil # convert false to nil
     	end
 
-    	def save( key, object )
-  		  object if File.open( path(key), "w" ) { |f| f.print ::JSON.pretty_generate(object) }
+    	def write( key, hash )
+  		  hash if File.open( path(key), "w" ) { |f| f.print ::JSON.pretty_generate(hash) }
     	end
 
   	end
