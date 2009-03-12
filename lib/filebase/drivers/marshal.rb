@@ -6,7 +6,7 @@ class Filebase
       include Mixin
 
       def initialize( root )
-        @root = root.to_s
+        super
         @extension = "marshal"
       end
 
@@ -24,8 +24,8 @@ class Filebase
     		obj or nil # convert false to nil
     	end
 
-    	def save( key, object )
-  		  object if File.open( path(key), "w" ) { |f| ::Marshal.dump(object, f) }
+    	def write( key, object )
+  		  File.open( path(key), "w" ) { |f| ::Marshal.dump(object, f); true }
     	end
 
   	end

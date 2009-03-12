@@ -7,7 +7,7 @@ class Filebase
       include Mixin
 
       def initialize( root )
-        @root = root.to_s
+        super
         @extension = "yml"
       end
 
@@ -25,7 +25,7 @@ class Filebase
     		obj or nil # convert false to nil
     	end
 
-    	def save( key, object )
+    	def write( key, object )
   		  object if File.open( path(key), "w" ) { |f| ::YAML.dump(object, f) }
     	end
 

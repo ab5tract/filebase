@@ -3,6 +3,11 @@ class Filebase
   module Drivers
     module Mixin
       
+      def initialize(root)
+        @root = root.to_s
+        FileUtils.mkdir_p(root) unless File.exist?(root)
+      end
+      
       def root
         @root
       end

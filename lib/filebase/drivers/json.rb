@@ -6,7 +6,7 @@ class Filebase
       include Mixin
       
       def initialize( root )
-        @root = root.to_s
+        super
         @extension = "json"
       end
 
@@ -25,7 +25,14 @@ class Filebase
     	end
 
     	def write( key, hash )
-  		  hash if File.open( path(key), "w" ) { |f| f.print ::JSON.pretty_generate(hash) }
+        File.open(path(key), "w") do |f|
+          begin
+            f.puts ::JSON.pretty_generate(hash)
+            true
+          rescue
+            nil
+          end
+        end
     	end
 
   	end

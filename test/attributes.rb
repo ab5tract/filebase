@@ -43,6 +43,12 @@ describe "An attributified object" do
     @thing.has_key?("pixie").should.be.false
   end
   
+  it "can tell you which keys it contains" do
+    @thing.set "smurf", "nuts"
+    @thing.set "pixie", "raisins"
+    @thing.keys.sort.should == ["pixie", "smurf"].sort
+  end
+  
   it "can delete an attribute with Hashlike consequences" do
     @thing.set "smurf", "nuts"
     @thing.delete("smurf").should == "nuts"

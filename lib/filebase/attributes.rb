@@ -10,6 +10,8 @@ module Attributes
 	
 	def has_key?( key ) ; @attrs.has_key?( key.to_s ) ; end
 	
+	def keys; @attrs.keys; end
+	
 	def delete( key ) ; @attrs.delete( key.to_s ) ; end
 	
 	def method_missing(name,*args)

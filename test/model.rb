@@ -1,19 +1,15 @@
 require "#{File.dirname(__FILE__)}/helpers"
-require 'filebase'
-require 'filebase/drivers/json'
-require 'filebase/drivers/yaml'
-require 'filebase/drivers/marshal'
-require 'filebase/model'
 
 class Person
-  include Filebase::Model[ "#{test_dir}/db/person" ]
+  include Filebase::Model[ "#{test_dir}/db/person", :YAML ]
 end
 
 class Organization
   include Filebase::Model[ "#{test_dir}/db/organization", :YAML ]
+  index_on :name
 end
 
-# Marshal format varies between ruby versions.  To generate the marshal data files,
+# Marshal format varies between Ruby versions.  To generate the marshal data files,
 # uncomment the below lines and run, then comment again.
 # Organization.create :key => "acme.com", :name => "Acme, Inc.", :members => [ "joe@acme.com"]
 # Person.create(:key => "joe@acme.com", :organization => "acme.com", :name => "Joe Smith")

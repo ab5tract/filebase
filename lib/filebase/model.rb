@@ -36,7 +36,7 @@ class Filebase
 		    def save( object )
 		      key = object.key
 		      raise( Filebase::Error, 'attempted to save an object with nil key' ) unless key and !key.empty?
-          @db.write( key, object.to_h ) and object
+          object if @db.write( key, object.to_h )
 		    end
 		    
 		    def delete( object )
@@ -68,25 +68,33 @@ class Filebase
 		        end
             # when we save, make sure to pick up any changes to the array
             (class<<self;self;end).module_eval do
-              alias_method :has_many_save, :save
+              old_save = instance_method(:save)
               define_method :save do |object|
   		          object.set( assoc_key, object.send( assoc_key ).map{ |x| x.key }.uniq )
-                has_many_save(object)
+                object if old_save.bind(self).call(object)
               end
             end
           end
 		    end
 		    
-		    def index_on( attribute )
-		      index ||= @db.class.new("#{@db.root}/indexes")
+		    def index_on( attribute, options={} )
+		      storage = options[:driver] ? Filebase::Drivers.const_get(options[:driver].to_s) : @db.class
+		      attribute = attribute.to_s
+		      index ||= storage.new("#{@db.root}/indexes")
+		      klass = self
 		      (class<<self;self;end).module_eval do
-            alias_method :index_on_save, :save
-            class_name = self.class.name
+            old_save = instance_method(:save)
             define_method :save do |object|
-              index_on_save(object)
-              class_index = index.find(class_name)
-              class_index[attribute] << object.key
-              class_index.save
+              old_save.bind(self).call(object)
+              attr_record = index.find(attribute) || {}
+              val = object[attribute].to_s
+              attr_record[val] ||= {}
+              attr_record[val][object.key] = true
+              object if index.write(attribute, attr_record)
+            end
+            define_method "find_by_#{attribute}" do |val|
+              ids = index.find(attribute)[val].keys
+              ids.map { |id| klass.find(id)  }
             end
           end
 		    end
@@ -96,8 +104,8 @@ class Filebase
       module InstanceMethods
         def save ; self.class.save( self ) ; end
         def delete ; self.class.delete( self ) ; self ; end
-        def ==(object) ; key == object.key ; end
-        def eql?(object) ; key == object.key ; end # this seems iffy
+        # def ==(object) ; key == object.key ; end
+        # def eql?(object) ; key == object.key ; end # this seems iffy
         def hash ; key.hash ; end
       end
 
