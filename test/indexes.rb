@@ -3,7 +3,7 @@ require "#{File.dirname(__FILE__)}/helpers"
 FileUtils.rm_r("#{test_dir}/db/user") if File.exist?("#{test_dir}/db/user")
 
 TestDriver = :JSON
-IndexDriver = :Marshal
+IndexDriver = :JSON
 
 
 describe "A model with an index" do
@@ -11,26 +11,40 @@ describe "A model with an index" do
   before do
     @class = Class.new do
       include Filebase::Model[ "#{test_dir}/db/user", TestDriver ]
-      index_on :email, :driver => IndexDriver
+      index_on :first, :driver => IndexDriver
     end
     @index = Class.new do
       include Filebase::Model[ "#{test_dir}/db/user/indexes", IndexDriver ]
     end
-    @user1 = @class.create( :key => 'automatthew', :email => 'self@automatthew.com', :name => 'Matthew King')
-    @user2 = @class.create( :key => 'dyoder', :email => 'dan@zeraweb.com', :name => 'Dan Yoder')
+    @user1 = @class.create( :key => 'automatthew', :email => 'self@automatthew.com', :first => 'Matthew')
+    @user2 = @class.create( :key => 'dyoder', :email => 'dan@zeraweb.com', :first => 'Dan')
+    @user3 = @class.create( :key => 'ddonnell', :email => 'ddonnell@attinteractive.com', :first => 'Dan')
   end
   
   after do
-    @user1.delete; @user2.delete
+    @user1.delete; @user2.delete; @user3.delete
   end
   
   it "adds to the index on save" do
-    @index.find(:email)["self@automatthew.com"].keys.should == ['automatthew']
-    @index.find(:email)["dan@zeraweb.com"].keys.should == ['dyoder']
+    @index.find(:first)["Matthew"].should == ['automatthew']
+    @index.find(:first)["Dan"].sort.should == ['dyoder', 'ddonnell'].sort
+  end
+  
+  it "does not duplicate index entries" do
+    @user1.save
+    @index.find(:first)["Matthew"].should == ['automatthew']
   end
   
   it "can find things by indexes" do
-    @class.find_by_email("dan@zeraweb.com").first["name"].should == "Dan Yoder"
+    @class.find_by_first("Matthew").first["email"].should == "self@automatthew.com"
+    @class.find_by_first("Smurf").should.be.empty
+  end
+  
+  it "removes from the index on delete" do
+    user4 = @class.create( :key => 'jrush', :email => 'jrush@attinteractive.com', :first => 'Jason')
+    user4.delete
+    @index.find(:first)["Jason"].should == []
+    @class.find_by_first("Jason").should.be.empty
   end
   
 end

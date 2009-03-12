@@ -30,6 +30,7 @@ class Filebase
 		      save( object )
 	      end
 		    def all ; @db.all.map { |attrs| new( attrs ) } ; end
+		    
 		    def find( key ) ; attrs = @db.find( key ); new( attrs ) if attrs ; end
 		    alias_method :[], :find
 		    
@@ -79,22 +80,34 @@ class Filebase
 		    
 		    def index_on( attribute, options={} )
 		      storage = options[:driver] ? Filebase::Drivers.const_get(options[:driver].to_s) : @db.class
-		      attribute = attribute.to_s
+		      field_name = attribute.to_s
 		      index ||= storage.new("#{@db.root}/indexes")
 		      klass = self
 		      (class<<self;self;end).module_eval do
             old_save = instance_method(:save)
+            old_delete = instance_method(:delete)
+            
             define_method :save do |object|
+              key = object.key
               old_save.bind(self).call(object)
-              attr_record = index.find(attribute) || {}
-              val = object[attribute].to_s
-              attr_record[val] ||= {}
-              attr_record[val][object.key] = true
-              object if index.write(attribute, attr_record)
+              field = index.find(field_name) || {}
+              val = object[field_name].to_s
+              list = field[val] ||= []
+              list << key unless list.include? key
+              object if index.write(field_name, field)
             end
-            define_method "find_by_#{attribute}" do |val|
-              ids = index.find(attribute)[val].keys
-              ids.map { |id| klass.find(id)  }
+            
+            define_method :delete do |object|
+              (field = index.find(field_name)) || return
+              val = object[field_name].to_s
+              field[val].delete(object.key)
+              index.write(field_name, field)
+              old_delete.bind(self).call(object)
+            end
+            
+            define_method "find_by_#{field_name}" do |val|
+              ids = index.find(field_name)[val]
+              ids ? ids.map { |id| klass.find(id)  } : []
             end
           end
 		    end
@@ -104,8 +117,8 @@ class Filebase
       module InstanceMethods
         def save ; self.class.save( self ) ; end
         def delete ; self.class.delete( self ) ; self ; end
-        # def ==(object) ; key == object.key ; end
-        # def eql?(object) ; key == object.key ; end # this seems iffy
+        def ==(object) ; key == object.key ; end
+        def eql?(object) ; key == object.key ; end # this seems iffy
         def hash ; key.hash ; end
       end
 
