@@ -25,7 +25,7 @@ describe 'A filebase' do
   end
   
   it 'can find multiple keys' do 
-    items = Thing.find_keys( "a", "c", "e" )
+    items = Thing.find_keys( ["a", "c", "e"] )
     items.size.should == 3
     items.last.key.should == "e"
   end
@@ -35,6 +35,10 @@ describe 'A filebase' do
     things = Thing.slice(start, length)
     things.size.should == 4
     things.map { |t| t.key }.should == %w{ c d e f }
+  end
+  
+  it "can tell you the number of records" do
+    Thing.count.should == 8
   end
 
   it 'allows you to access an existing record' do

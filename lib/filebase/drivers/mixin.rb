@@ -25,6 +25,10 @@ class Filebase
         Dir["#{@root}/*.#{@extension}"].map { |fname| File.basename(fname, ".#{@extension}") }
       end
       
+      def count
+        Dir["#{@root}/*.#{@extension}"].size
+      end
+      
       def delete( key )
     		::FileUtils.remove( path( key ) )
   	  end
