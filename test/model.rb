@@ -25,9 +25,12 @@ describe 'A filebase' do
   end
   
   it 'can find multiple keys' do 
-    items = Thing.find_keys( ["a", "c", "e"] )
-    items.size.should == 3
-    items.last.key.should == "e"
+    things = Thing.find_keys( ["a", "c", "e"] )
+    things.size.should == 3
+    things.last.key.should == "e"
+    
+    things = Thing.find_keys([ "a", "b", "foo"])
+    things.last.should == nil
   end
   
   it "can return a page of results" do
@@ -35,6 +38,11 @@ describe 'A filebase' do
     things = Thing.slice(start, length)
     things.size.should == 4
     things.map { |t| t.key }.should == %w{ c d e f }
+
+    Thing.slice(33, 6).should == [  ]
+    
+    things = Thing.reverse_slice(1, 3)
+    things.map { |t| t.key }.should == %w{ g f e }
   end
   
   it "can tell you the number of records" do

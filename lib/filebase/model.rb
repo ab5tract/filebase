@@ -37,12 +37,17 @@ class Filebase
 		    def keys; @db.keys; end
 		    
 		    def find_keys(keys)
-		      @db.find_keys(keys).map { |h| new(h) }
+		      @db.find_keys(keys).map { |h| new(h) if h }
 		    end
 		    
 		    def slice(start, length)
 		      k = self.keys.slice(start, length)
-		      find_keys(k)
+		      k ? find_keys(k) : []
+		    end
+		    
+		    def reverse_slice(start, length)
+		      k = self.keys.reverse.slice(start, length)
+		      k ? find_keys(k) : []
 		    end
 		    
 		    def count
