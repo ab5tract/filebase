@@ -111,9 +111,16 @@ class Filebase
               key = object.key
               old_save.bind(self).call(object)
               field = index.find(field_name) || {}
-              val = object[field_name].to_s
-              list = field[val] ||= []
-              list << key unless list.include? key
+              val = object[field_name]
+              if val.is_a? Array
+                val.each do |v|
+                  list = (field[v.to_s] ||= [])
+                  list << key unless list.include? key
+                end
+              else
+                list = field[val.to_s] ||= []
+                list << key unless list.include? key
+              end
               object if index.write(field_name, field)
             end
             

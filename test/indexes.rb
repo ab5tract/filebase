@@ -47,4 +47,13 @@ describe "A model with an index" do
     @class.find_by_first("Jason").should.be.empty
   end
   
+  it "is not stupid about array values" do
+    user5 = @class.create(:key => 'jjjschmidt', 
+      :email => 'jjjschmidt@attinteractive.com', :first => %w{ John Jacob Jingleheimer} )
+    
+    @index.find(:first)["John"].should == ['jjjschmidt']
+    @index.find(:first)["Jacob"].should == ['jjjschmidt']
+    @index.find(:first)["Jingleheimer"].should == ['jjjschmidt']
+  end
+  
 end
