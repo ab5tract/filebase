@@ -24,6 +24,14 @@ class Filebase
     		obj['key'] = key if obj.is_a? Hash
     		obj or nil # convert false to nil
     	end
+    	
+    	def find_keys(keys)
+        keys.map do |key|
+          obj = ::YAML.load_file( path( key ) ) rescue nil
+      		obj['key'] = key if obj.is_a? Hash
+      		obj or nil # convert false to nil
+        end
+      end
 
     	def write( key, object )
   		  object if File.open( path(key), "w" ) { |f| ::YAML.dump(object, f) }

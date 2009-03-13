@@ -34,6 +34,17 @@ class Filebase
 		    def find( key ) ; attrs = @db.find( key ); new( attrs ) if attrs ; end
 		    alias_method :[], :find
 		    
+		    def keys; @db.keys; end
+		    
+		    def find_keys(*keys)
+		      @db.find_keys(keys).map { |h| new(h) }
+		    end
+		    
+		    def slice(start, length)
+		      k = self.keys.slice(start, length)
+		      find_keys(*k)
+		    end
+		    
 		    def save( object )
 		      key = object.key
 		      raise( Filebase::Error, 'attempted to save an object with nil key' ) unless key and !key.empty?
@@ -117,7 +128,9 @@ class Filebase
       module InstanceMethods
         def save ; self.class.save( self ) ; end
         def delete ; self.class.delete( self ) ; self ; end
-        def ==(object) ; key == object.key ; end
+        def ==(object)
+          key == object.key if object.is_a? Attributes
+        end
         def eql?(object) ; key == object.key ; end # this seems iffy
         def hash ; key.hash ; end
       end

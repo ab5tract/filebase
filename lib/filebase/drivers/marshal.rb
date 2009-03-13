@@ -23,6 +23,14 @@ class Filebase
     		obj['key'] = key if obj.is_a? Hash
     		obj or nil # convert false to nil
     	end
+    	
+    	def find_keys(keys)
+        keys.map do |key|
+          obj = File.open( path(key) ) { |f| ::Marshal.load(f) } rescue nil
+      		obj['key'] = key if obj.is_a? Hash
+      		obj or nil # convert false to nil
+        end
+      end
 
     	def write( key, object )
   		  File.open( path(key), "w" ) { |f| ::Marshal.dump(object, f); true }

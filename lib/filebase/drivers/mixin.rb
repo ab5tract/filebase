@@ -21,6 +21,10 @@ class Filebase
         File.exist?( path(key) )
       end
       
+      def keys
+        Dir["#{@root}/*.#{@extension}"].map { |fname| File.basename(fname, ".#{@extension}") }
+      end
+      
       def delete( key )
     		::FileUtils.remove( path( key ) )
   	  end
