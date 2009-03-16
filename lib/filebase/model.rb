@@ -66,6 +66,15 @@ class Filebase
 		      @db.delete( object.key )
 		    end
 		    
+		    def index
+		      @index
+		    end
+		    
+		    def reindex # Yes, this would take a lot of time.
+		      @index.all { |field| field.delete }
+		      all.each { |record| record.save }
+		    end
+		    
 		    def has_one( assoc_key, options = {} )
 		      module_eval do
 		        define_method assoc_key do
@@ -101,7 +110,7 @@ class Filebase
 		    def index_on( attribute, options={} )
 		      storage = options[:driver] ? Filebase::Drivers.const_get(options[:driver].to_s) : @db.class
 		      field_name = attribute.to_s
-		      index ||= storage.new("#{@db.root}/indexes")
+		      @index = index ||= storage.new("#{@db.root}/indexes")
 		      klass = self
 		      (class<<self;self;end).module_eval do
             old_save = instance_method(:save)
@@ -111,23 +120,25 @@ class Filebase
               key = object.key
               old_save.bind(self).call(object)
               field = index.find(field_name) || {}
-              val = object[field_name]
-              if val.is_a? Array
-                val.each do |v|
-                  list = (field[v.to_s] ||= [])
+              if val = object[field_name]
+                if val.is_a? Array
+                  val.each do |v|
+                    list = (field[v.to_s] ||= [])
+                    list << key unless list.include? key
+                  end
+                else
+                  list = field[val.to_s] ||= []
                   list << key unless list.include? key
                 end
-              else
-                list = field[val.to_s] ||= []
-                list << key unless list.include? key
               end
               object if index.write(field_name, field)
             end
             
             define_method :delete do |object|
               (field = index.find(field_name)) || return
-              val = object[field_name].to_s
-              field[val].delete(object.key)
+              if (val = object[field_name].to_s)
+                field[val].delete(object.key)
+              end
               index.write(field_name, field)
               old_delete.bind(self).call(object)
             end

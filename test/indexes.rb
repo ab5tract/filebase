@@ -56,4 +56,8 @@ describe "A model with an index" do
     @index.find(:first)["Jingleheimer"].should == ['jjjschmidt']
   end
   
+  it "will gladly betray its index" do
+    @class.index.find(:first).keys.should.include? "John"
+  end
+  
 end
