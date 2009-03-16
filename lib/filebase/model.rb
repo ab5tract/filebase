@@ -57,6 +57,16 @@ class Filebase
 		    def save( object )
 		      key = object.key
 		      raise( Filebase::Error, 'attempted to save an object with nil key' ) unless key and !key.empty?
+		      #Hack to save uploaded files before serialization.
+          object.each do |k, v|
+            if((v.is_a? Hash) and (v[:tempfile].class == Tempfile) and (v[:tempfile].size != 0))
+              dirpath = "#{@db.root}/files"
+              ::FileUtils.mkdir_p(dirpath) unless File.exists?(dirpath)
+              filepath = "#{@db.root}/files/#{key}"
+              ::FileUtils.mv(v[:tempfile].path, filepath, :force => true)
+              object['filepath']  =  filepath
+            end
+          end
           object if @db.write( key, object.to_h )
 		    end
 		    
