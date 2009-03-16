@@ -97,12 +97,8 @@ class Filebase
 		          @has_many[assoc_key] ||= ( get( assoc_key ) || [] ).uniq.map { |key| foreign_class.find( key ) } 
 		        end
             # when we save, make sure to pick up any changes to the array
-            (class<<self;self;end).module_eval do
-              old_save = instance_method(:save)
-              define_method :save do |object|
-  		          object.set( assoc_key, object.send( assoc_key ).map{ |x| x.key }.uniq )
-                object if old_save.bind(self).call(object)
-              end
+            before_save do |object|
+              object.set( assoc_key, object.send( assoc_key ).map{ |x| x.key }.uniq )
             end
           end
 		    end
@@ -112,40 +108,78 @@ class Filebase
 		      field_name = attribute.to_s
 		      @index = index ||= storage.new("#{@db.root}/indexes")
 		      klass = self
-		      (class<<self;self;end).module_eval do
-            old_save = instance_method(:save)
-            old_delete = instance_method(:delete)
-            
-            define_method :save do |object|
-              key = object.key
-              old_save.bind(self).call(object)
-              field = index.find(field_name) || {}
-              if val = object[field_name]
-                if val.is_a? Array
-                  val.each do |v|
-                    list = (field[v.to_s] ||= [])
-                    list << key unless list.include? key
-                  end
-                else
-                  list = field[val.to_s] ||= []
-                  list << key unless list.include? key
-                end
-              end
-              object if index.write(field_name, field)
-            end
-            
-            define_method :delete do |object|
-              (field = index.find(field_name)) || return
-              if (val = object[field_name].to_s)
-                field[val].delete(object.key)
-              end
-              index.write(field_name, field)
-              old_delete.bind(self).call(object)
-            end
-            
+		      
+		      (class<<self;self;end).module_eval do            
             define_method "find_by_#{field_name}" do |val|
               ids = index.find(field_name)[val]
               ids ? ids.map { |id| klass.find(id)  } : []
+            end
+          end
+          
+		      after_save do |object|
+		        key = object.key
+            field = index.find(field_name) || {}
+            if val = object[field_name]
+              if val.is_a? Array
+                val.each do |v|
+                  list = (field[v.to_s] ||= [])
+                  list << key unless list.include? key
+                end
+              else
+                list = field[val.to_s] ||= []
+                list << key unless list.include? key
+              end
+            end
+            object if index.write(field_name, field)
+		      end
+          
+          before_delete do |object|
+		        (field = index.find(field_name)) || return
+            if val = object[field_name]
+              field[val.to_s].delete(object.key)
+            end
+            index.write(field_name, field)
+		      end
+		      
+		    end
+		    
+		    
+		    def before_save(&block)
+		      (class<<self;self;end).module_eval do
+            old_save = instance_method(:save)
+            define_method :save do |object|
+              yield object
+              old_save.bind(self).call(object)
+            end
+          end
+		    end
+		    
+		    def after_save(&block)
+		      (class<<self;self;end).module_eval do
+            old_save = instance_method(:save)
+            define_method :save do |object|
+              old_save.bind(self).call(object)
+              yield object
+            end
+          end
+		    end
+		    
+		    def before_delete(&block)
+		      (class<<self;self;end).module_eval do
+            old_delete = instance_method(:delete)
+            define_method :delete do |object|
+              yield object
+              old_delete.bind(self).call(object)
+            end
+          end
+		    end
+		    
+		    def after_delete(&block)
+		      (class<<self;self;end).module_eval do
+            old_delete = instance_method(:delete)
+            define_method :delete do |object|
+              old_delete.bind(self).call(object)
+              yield object
             end
           end
 		    end
