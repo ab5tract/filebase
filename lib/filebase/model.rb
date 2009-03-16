@@ -130,7 +130,7 @@ class Filebase
                 list << key unless list.include? key
               end
             end
-            object if index.write(field_name, field)
+            index.write(field_name, field)
 		      end
           
           before_delete do |object|
@@ -159,7 +159,7 @@ class Filebase
             old_save = instance_method(:save)
             define_method :save do |object|
               old_save.bind(self).call(object)
-              yield object
+              object if yield( object )
             end
           end
 		    end
