@@ -22,7 +22,7 @@ class Filebase
       end
       
       def keys
-        Dir["#{@root}/*.#{@extension}"].map { |fname| File.basename(fname, ".#{@extension}") }
+        Dir["#{@root}/*.#{@extension}"].sort.map { |fname| File.basename(fname, ".#{@extension}") }
       end
       
       def count

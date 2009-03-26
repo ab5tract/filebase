@@ -10,7 +10,7 @@ Gem::manage_gems
 
 SPEC = Gem::Specification.new do |s|
   s.name = 'filebase'
-  s.version = "0.3.7"
+  s.version = "0.3.8"
   s.rubyforge_project = 'filebase'
   s.summary = "Open-source framework for building Ruby-based Web applications."
   s.specification_version = 2 if s.respond_to? :specification_version=
