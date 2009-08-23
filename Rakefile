@@ -6,11 +6,10 @@ require 'fileutils'
 require 'rake/gempackagetask'
 
 include FileUtils
-Gem::manage_gems
 
 SPEC = Gem::Specification.new do |s|
   s.name = 'filebase'
-  s.version = "0.3.8"
+  s.version = "0.3.9"
   s.rubyforge_project = 'filebase'
   s.summary = "Open-source framework for building Ruby-based Web applications."
   s.specification_version = 2 if s.respond_to? :specification_version=
@@ -26,7 +25,7 @@ SPEC = Gem::Specification.new do |s|
   s.required_ruby_version = Gem::Requirement.new(">= 1.8.6")
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{Simple file-based database with model support.}
-  s.add_dependency(%q<extensions>, [">= 0"])
+  s.add_dependency(%q<extensions json>, [">= 0"])
 end
 
 task :package => [ :gemspec ] do 

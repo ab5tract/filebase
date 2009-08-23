@@ -1,5 +1,7 @@
 require 'yaml'
 require 'fileutils'
+require 'filebase/drivers/mixin'
+
 class Filebase
   
   module Drivers

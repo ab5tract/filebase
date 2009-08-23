@@ -1,5 +1,7 @@
 require 'json'
 require 'fileutils'
+require 'filebase/drivers/mixin'
+
 class Filebase
   module Drivers
     class JSON

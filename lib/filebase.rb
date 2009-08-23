@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'filebase/drivers/mixin'
 require 'filebase/drivers/json'
 
 class Filebase
