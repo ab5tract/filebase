@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.required_ruby_version = Gem::Requirement.new(">= 1.8.6")
   s.rubyforge_project = %q{filebase}
-  s.rubygems_version = %q{1.3.3}
+  s.rubygems_version = %q{1.3.5}
   s.summary = %q{Simple file-based database with model support.}
 
   if s.respond_to? :specification_version then
@@ -22,13 +22,13 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<extensions>, ["= 0.6.0"])
-      s.add_runtime_dependency(%q<json>, ["= 1.1.7"])
+      s.add_runtime_dependency(%q<json-jruby>, [">= 0"])
     else
       s.add_dependency(%q<extensions>, ["= 0.6.0"])
-      s.add_dependency(%q<json>, ["= 1.1.7"])
+      s.add_dependency(%q<json-jruby>, [">= 0"])
     end
   else
     s.add_dependency(%q<extensions>, ["= 0.6.0"])
-    s.add_dependency(%q<json>, ["= 1.1.7"])
+    s.add_dependency(%q<json-jruby>, [">= 0"])
   end
 end

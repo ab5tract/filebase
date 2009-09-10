@@ -7,6 +7,8 @@ require 'rake/gempackagetask'
 
 include FileUtils
 
+jruby = (defined?(RUBY_ENGINE) and RUBY_ENGINE == 'jruby') ? true : false
+
 SPEC = Gem::Specification.new do |s|
   s.name = 'filebase'
   s.version = "0.3.11"
@@ -26,7 +28,7 @@ SPEC = Gem::Specification.new do |s|
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{Simple file-based database with model support.}
   s.add_runtime_dependency( 'extensions', '=0.6.0')
-	if defined?(RUBY_ENGINE) and RUBY_ENGINE == 'jruby'
+	if jruby
   	s.add_runtime_dependency( 'json-jruby')
 	else
 		s.add_runtime_dependency('json', "=1.1.7")
@@ -42,7 +44,11 @@ task :clean do
 end
 
 task :install => :package do
-  system 'sudo gem install ./*.gem'
+	if jruby
+		system 'jruby -S gem install ./*.gem'
+	else
+  	system 'sudo gem install ./*.gem'
+	end
 end
 
 desc "create .gemspec file (useful for github)"
