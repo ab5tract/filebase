@@ -9,7 +9,7 @@ include FileUtils
 
 SPEC = Gem::Specification.new do |s|
   s.name = 'filebase'
-  s.version = "0.3.10"
+  s.version = "0.3.11"
   s.rubyforge_project = 'filebase'
   s.summary = "Open-source framework for building Ruby-based Web applications."
   s.specification_version = 2 if s.respond_to? :specification_version=
@@ -26,7 +26,11 @@ SPEC = Gem::Specification.new do |s|
   s.rubygems_version = %q{1.2.0}
   s.summary = %q{Simple file-based database with model support.}
   s.add_runtime_dependency( 'extensions', '=0.6.0')
-  s.add_runtime_dependency( 'json', '=1.1.7')
+	if defined?(RUBY_ENGINE) and RUBY_ENGINE == 'jruby'
+  	s.add_runtime_dependency( 'json-jruby')
+	else
+		s.add_runtime_dependency('json', "=1.1.7")
+	end
 end
 
 task :package => [ :gemspec ] do 
